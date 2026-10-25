@@ -1,0 +1,192 @@
+{
+  "_doc": "10-21 밤 예시값(가짜 작업대·위에서 수직 집기만) — selftest 의 숫자 배치·실행기 시험용. 실제 값은 config.json.",
+  "calibrated": false,
+  "joint": {
+    "_doc": "URDF 각(도) = sign × n × (range_max−range_min)/200 × 360/4095 + offset_deg. 범위는 Studio 보정(follower_24)에서 읽고, 못 읽으면 range_default. sign 전부 1 은 10-20 녹화 40개의 최저점이 탁자면(z 중앙 0mm)에 모이는 것으로 확인",
+    "range_default": [
+      0,
+      4095
+    ],
+    "sign": {
+      "shoulder_pan": 1,
+      "shoulder_lift": 1,
+      "elbow_flex": 1,
+      "wrist_flex": 1,
+      "wrist_roll": 1
+    },
+    "offset_deg": {
+      "shoulder_pan": 0,
+      "shoulder_lift": 0,
+      "elbow_flex": 0,
+      "wrist_flex": 0,
+      "wrist_roll": 0
+    },
+    "limits_deg": {
+      "_doc": "IK 관절 범위(도) = 10-20 녹화 40개(21,958프레임)에서 실제로 간 범위 ±5°. 단 wrist_roll 은 녹화가 −32~98° 만 써서 URDF 한계 −10°(위에서 수직 자세라 탁자와 안 부딪힘) — 케이블 여유는 입회 보정 1단계에서 확인",
+      "shoulder_pan": [
+        -60,
+        55
+      ],
+      "shoulder_lift": [
+        -99,
+        80
+      ],
+      "elbow_flex": [
+        -112,
+        86
+      ],
+      "wrist_flex": [
+        -96,
+        97
+      ],
+      "wrist_roll": [
+        -147,
+        153
+      ]
+    }
+  },
+  "table": {
+    "_doc": "markers_mm = 테이프 4점의 작업대 좌표(줄자). 팔 끝으로 짚을 수 있게 닿는 범위(reach) 안에 붙인다. markers_px = 같은 4점에 블록을 올리고 detect 로 얻은 위 카메라 픽셀 중심(블록 높이에서 맞추므로 시차가 빠진다). base = 작업대 좌표에서 본 로봇 base_link(팔 끝으로 테이프 점 짚기로 구함). yaw = 작업대 x 축에서 로봇 앞(x) 축까지",
+    "markers_mm": [
+      [
+        30,
+        20
+      ],
+      [
+        270,
+        20
+      ],
+      [
+        270,
+        160
+      ],
+      [
+        30,
+        160
+      ]
+    ],
+    "markers_px": [
+      [
+        96,
+        430
+      ],
+      [
+        552,
+        438
+      ],
+      [
+        514,
+        92
+      ],
+      [
+        128,
+        84
+      ]
+    ],
+    "base": {
+      "x": 150,
+      "y": -110,
+      "yaw_deg": 90
+    },
+    "input_area_mm": [
+      [
+        -45,
+        10
+      ],
+      [
+        105,
+        165
+      ]
+    ]
+  },
+  "block_mm": 30,
+  "heights_mm": {
+    "_doc": "tcp(여기서는 끝 그대로) 높이, 탁자면 = 0. finger_min = 계획이 허용하는 집게 끝 최저 높이",
+    "grasp": 15,
+    "place": 17,
+    "approach": 50,
+    "carry": 80,
+    "min_link": 20,
+    "finger_min": 0
+  },
+  "gripper": {
+    "_doc": "정규화 0~100(클수록 벌어짐). 10-20 녹화: 쉴 때 50, 벌린 최대 61~73. 블록용 값과 벌어진 폭(mm)은 입회 보정 5단계에서 잰다",
+    "open": 66,
+    "open_gap_mm": 50,
+    "release": 60,
+    "release_gap_mm": 38,
+    "close": 52,
+    "finger_mm": 8
+  },
+  "digit": {
+    "_doc": "5행×3열. origin = 맨 위 행·왼쪽 열 칸 중심(작업대 mm). 열은 yaw 방향, 행은 그 오른쪽 90°(yaw 0 이면 작업대 −y)로 내려간다",
+    "origin_mm": [
+      295,
+      135
+    ],
+    "pitch_mm": [
+      45,
+      45
+    ],
+    "yaw_deg": -90
+  },
+  "motion": {
+    "rate_hz": 30,
+    "max_deg_s": 45,
+    "cart_mm_s": 50,
+    "grip_s": 0.8,
+    "settle_s": 0.3
+  },
+  "safety": {
+    "_doc": "실행기(executor.py) 안전장치. exec_deg_s = 실제 송신 관절 속도(첫 구동은 느리게, 상한 exec_deg_s_max). 추종 오차 track_max_deg 를 track_ticks 틱 연속 넘으면 중단(lag_ticks 틱 전 명령과 비교, 그리퍼 제외). 작업 공간: 끝 높이 ≥ floor_mm, 관절 높이 ≥ link_floor_mm, 끝이 radius_below_mm 아래일 때 반경 radius_mm 안, 금지 구역(비전 zones.json 의 그릇 3·손 자리 + forbid_extra_mm 다각형, 작업대 mm) 위 forbid_below_mm 아래 금지(여유 forbid_margin_mm). gripper.close ≥ grip_close_min_n(입회 5단계: 블록에 닿는 값 − 2)",
+    "exec_deg_s": 15,
+    "exec_deg_s_max": 45,
+    "grip_units_s": 20,
+    "track_max_deg": 8,
+    "track_ticks": 3,
+    "lag_ticks": 3,
+    "stale_s": 0.5,
+    "start_tol_deg": 10,
+    "floor_mm": 5,
+    "link_floor_mm": 20,
+    "radius_mm": [
+      110,
+      400
+    ],
+    "radius_below_mm": 120,
+    "forbid_below_mm": 100,
+    "forbid_margin_mm": 20,
+    "forbid_extra_mm": [],
+    "grip_min_n": 50,
+    "grip_close_min_n": 50
+  },
+  "studio_environment": null,
+  "home_n": [
+    0.0,
+    -52.3,
+    4.8,
+    50.9,
+    2.2,
+    50.1
+  ],
+  "tilt_deg": {
+    "grasp_max": 0,
+    "release_max": 0,
+    "step": 5,
+    "jaw_incline_max": 90
+  },
+  "bowls": {
+    "rim_mm": 20,
+    "release_above_mm": 50,
+    "release_margin_mm": 20,
+    "spread_mm": 20,
+    "targets": {
+      "red_ok": "bowl_red",
+      "blue_ok": "bowl_blue",
+      "red_defect": "bowl_defect",
+      "blue_defect": "bowl_defect"
+    }
+  },
+  "zones_json": null,
+  "_zones_doc": "예시 작업대라 실제 카메라 구역(vision/zones.json)은 안 쓴다 — 금지 구역은 safety.forbid_extra_mm 로만"
+}

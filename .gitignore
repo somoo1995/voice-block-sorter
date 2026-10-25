@@ -1,0 +1,40 @@
+# 파이썬·가상환경
+.venv/
+__pycache__/
+*.pyc
+
+# 모델·캐시 (pull_models.sh 로 받는다)
+models/
+ovms/
+.ov_cache/
+dl/
+weights/
+vision/models/
+*.onnx
+*.bin
+*.pt
+
+# 데이터·실행 기록·로그
+runs/
+logs/
+*.log
+robot/logs/
+robot/.state/
+vision/data/
+vision/datasets/
+vision/labels_draft/
+vision/runs_train/
+vision/_test/
+agent/.cache/
+ui/tts_out/
+ui/voice_log/
+ui/mock_out/
+ui/reports/
+bench/out/
+
+# 백업
+*.bak*
+*_before_*
+
+# 비밀값
+.env

@@ -1,0 +1,245 @@
+{
+ "_doc": "좌표 집기 설정. mm·도 단위. 10-22 15:30 입회 보정(B 카메라·C 짚기) + r14 녹화 분석(COORD_PICK.md 2.2). 예시값은 config_example.json.",
+ "calibrated": true,
+ "_calibrated_doc": "r15: 값은 10-22 실측 보정(r14)이지만 calibrated 는 총괄이 사용자 입회 공중 리허설(빈손 궤적) 1회 통과를 확인한 뒤 true 로 켠다. 그 전에는 dry-run 과 공중 리허설(--lift-mm ≥ safety.rehearsal_lift_min_mm)만 보낼 수 있다",
+ "joint": {
+  "_doc": "URDF 각(도) = sign × n × (range_max−range_min)/200 × 360/4095 + offset_deg. 범위는 Studio 보정(follower_24)에서 읽고, 못 읽으면 range_default. sign 전부 1 은 10-20 녹화 40개의 최저점이 탁자면(z 중앙 0mm)에 모이는 것으로 확인. offset 0 유지: 10-22 짚기 4점으로 어깨·팔꿈치·손목 영점을 맞추면 짚기 z 는 좋아지지만 녹화 102번 집기 검증은 나빠졌다(11.2 → 11.8mm, 과적합)",
+  "range_default": [
+   0,
+   4095
+  ],
+  "sign": {
+   "shoulder_pan": 1,
+   "shoulder_lift": 1,
+   "elbow_flex": 1,
+   "wrist_flex": 1,
+   "wrist_roll": 1
+  },
+  "offset_deg": {
+   "shoulder_pan": 0,
+   "shoulder_lift": 0,
+   "elbow_flex": 0,
+   "wrist_flex": 0,
+   "wrist_roll": 0
+  },
+  "limits_deg": {
+   "_doc": "IK 관절 범위(도) = 녹화에서 실제로 간 범위 ±5°: 10-20 40개(21,958프레임) ∪ 10-22 pick_defect·pick_red·pick_green 153개(팬 −58~84 — 불량·초록 그릇에 놓을 때, 어깨 −95~80, 팔꿈치 −107~61, 손목 10~92, 롤 −52~94). wrist_roll 은 URDF 한계 −10°(케이블 여유는 입회 때 눈으로). wrist_flex 는 URDF 한계 ±95°(녹화 최대 92)",
+   "shoulder_pan": [
+    -63,
+    88
+   ],
+   "shoulder_lift": [
+    -99,
+    85
+   ],
+   "elbow_flex": [
+    -112,
+    86
+   ],
+   "wrist_flex": [
+    -95,
+    95
+   ],
+   "wrist_roll": [
+    -147,
+    153
+   ]
+  }
+ },
+ "table": {
+  "_doc": "작업대 좌표 원점 = 투입 구역 주황 테두리 바깥 꼭짓점 ①(로봇 쪽·초록 그릇 쪽), x = 분홍 그릇 쪽, y = 로봇에서 먼 쪽(바깥 330×200, 테이프 폭 24). markers_mm = 안쪽 꼭짓점 4개. markers_px = 같은 점의 위 카메라 픽셀(블록 높이 — 바깥 꼭짓점 위 블록 4개 색 중심의 호모그래피로 옮김). base = 짚기 4점(Studio 데이터셋 calibrate, 팔로워 측정값, 고정 집게 끝)으로 맞춘 로봇 base_link 위치·방향(calib-base --contact fixed_tip). 잔차 3~6mm",
+  "markers_mm": [
+   [
+    24,
+    24
+   ],
+   [
+    306,
+    24
+   ],
+   [
+    306,
+    176
+   ],
+   [
+    24,
+    176
+   ]
+  ],
+  "markers_px": [
+   [
+    149.6,
+    247.7
+   ],
+   [
+    311.0,
+    236.5
+   ],
+   [
+    307.7,
+    173.0
+   ],
+   [
+    165.1,
+    176.5
+   ]
+  ],
+  "base": {
+   "x": 201.4,
+   "y": -224.7,
+   "yaw_deg": 88.4
+  },
+  "input_area_mm": [
+   [
+    24,
+    24
+   ],
+   [
+    306,
+    176
+   ]
+  ]
+ },
+ "tcp_mm": [
+  -28.5,
+  12.7,
+  0
+ ],
+ "_tcp_doc": "집게 가운데(블록이 오는 점)를 끝(gripper_frame_link) 좌표로. 10-22 녹화 pick_red·pick_green 102번 집기에서 첫 장면 블록 위치(HSV·호모그래피)와 집는 순간 FK 를 맞춤 — 잔차 중앙 11mm·90% 21mm, 분홍↔초록 교차 검증 같음. 메시로 본 두 집게 안쪽 면은 x 0(고정)·−66(움직임, n=63)",
+ "block_mm": 54,
+ "heights_mm": {
+  "_doc": "tcp 높이(탁자면 = 0). tcp 가 수직이면 고정 집게 끝은 6.3mm 아래. grasp 14 → 집게 끝 약 8mm(녹화 사람은 0 근처까지 내림). approach = 블록 위에서 수직으로 내려가기 시작하는 높이. carry = 블록을 들고 옮기는 높이(놓는 높이보다 낮으면 놓는 높이). finger_min = 계획이 허용하는 집게 끝 최저. min_link = 끝을 뺀 관절 원점 최저. grasp_finger = 기울여 집을 때 집게 끝 모서리가 이보다 낮아지면 집는 높이를 그만큼 올린다. over_zone = 목표가 아닌 그릇·손 자리(금지 구역, 100mm 아래 금지) 위를 지나는 이동의 tcp 높이(기울면 집게 끝이 tcp 보다 20~30mm 낮다)",
+  "grasp": 5,
+  "approach": 50,
+  "carry": 70,
+  "place": 10,
+  "min_link": 20,
+  "finger_min": 0,
+  "grasp_finger": 2,
+  "over_zone": 130
+ },
+ "tilt_deg": {
+  "_doc": "집게 기울기(수직에서 팔 평면 바깥쪽, 도). 먼 점일수록 0 부터 step 씩 늘려 처음 되는 값. 10-22 녹화 153번 집기: 중앙 11·90% 25·최대 32 → grasp_max 35. 놓기 151번: 최대 44 → release_max 45. jaw_incline_max = 기울인 채 집게축이 수평에서 기운 각 한도(녹화 −27~8, 90% 17). margin_min = 관절 한계(녹화 범위 ±5°)까지 이만큼 남는 기울기를 먼저 고른다(사람이 쓴 범위 안)",
+  "grasp_max": 35,
+  "release_max": 45,
+  "step": 5,
+  "jaw_incline_max": 20,
+  "margin_min": 5
+ },
+ "gripper": {
+  "_doc": "정규화 0~100(클수록 벌어짐, 1 = 3.6°). 두 집게 안쪽 틈(메시 계산): 50 → 16mm, 52 → 25, 55 → 36, 58 → 46, 60 → 56, 63 → 66. 녹화 쉴 때 50·벌림 60~68·쥔 채 50~59. close 51 = 3cm 스펀지를 약 10mm 누름",
+  "open": 63,
+  "release": 58,
+  "close": 51,
+  "finger_mm": 8
+ },
+ "bowls": {
+  "_doc": "놓는 점 = vision/zones.json 그릇 다각형 가운데(픽셀)의 호모그래피(블록 높이, r15). 닿지 않으면 15mm 씩 로봇 쪽으로 — 다각형 가장자리에서 edge_mm 안쪽까지만. center_mm 에 적으면 그 점이 가운데. _recorded_drop_mm = 10-22 녹화에서 사람이 놓은 자리(tcp, 새 보정) 중앙 — 분홍 48번·초록 51번은 zones 다각형 안 100%·98%, 불량 43번은 65%(로봇 쪽 가장자리, zones 가운데와 61mm). 놓기 = tcp 가 rim_mm + release_above_mm 높이(그릇 위 50mm 이상, 그릇 안으로 내려가지 않음). rim_mm 은 추정(종이 접시) — 입회 때 잰다. 한 그릇에 여러 개면 spread_mm 씩 옆으로. 실행기는 목표 그릇 위를 (놓는 tcp 높이 − release_margin_mm) 까지만 허용 — 집게 끝 기준(30° 기울이면 집게 끝은 tcp 보다 약 22mm 낮다)",
+  "rim_mm": 20,
+  "release_above_mm": 50,
+  "release_margin_mm": 30,
+  "spread_mm": 20,
+  "center_mm": {},
+  "targets": {
+   "red_ok": "bowl_red",
+   "blue_ok": "bowl_blue",
+   "red_defect": "bowl_defect",
+   "blue_defect": "bowl_defect"
+  },
+  "_recorded_drop_mm": {
+   "bowl_red": [
+    427,
+    78
+   ],
+   "bowl_blue": [
+    -85,
+    44
+   ],
+   "bowl_defect": [
+    437,
+    -105
+   ]
+  },
+  "edge_mm": 25
+ },
+ "digit": {
+  "_doc": "5행×3열. origin = 맨 위 행·왼쪽 열 칸 중심(작업대 mm). 열은 yaw 방향, 행은 그 오른쪽 90°(yaw 0 이면 작업대 −y)로 내려간다. 투입 구역 안(10-22 작업대)",
+  "origin_mm": [
+   255,
+   140
+  ],
+  "pitch_mm": [
+   45,
+   45
+  ],
+  "yaw_deg": -90
+ },
+ "motion": {
+  "rate_hz": 30,
+  "max_deg_s": 45,
+  "cart_mm_s": 30,
+  "grip_s": 0.8,
+  "settle_s": 1.0,
+  "air_mm_s": 120,
+  "air_deg_s": 60
+ },
+ "safety": {
+  "_doc": "실행기(executor.py) 안전장치. exec_deg_s = 실제 송신 관절 속도(첫 구동은 느리게, 상한 exec_deg_s_max). 추종 오차 track_max_deg 를 track_ticks 틱 연속 넘으면 중단(lag_ticks 틱 전 명령과 비교, 그리퍼 제외). 작업 공간: 집게 끝 최저점 ≥ floor_mm, 관절 높이 ≥ link_floor_mm, 집게 끝이 radius_below_mm 아래일 때 반경 radius_mm 안(10-22: 투입 구역이 250~440mm 라 460), 금지 구역(비전 zones.json 의 그릇 3·손 자리 + forbid_extra_mm 다각형, 작업대 mm) 위 forbid_below_mm 아래 금지(여유 forbid_margin_mm, 그릇 옮기기의 목표 그릇은 놓는 높이까지 허용). gripper.close ≥ grip_close_min_n. rehearsal_lift_min_mm = 이 높이 이상 올린 공중 리허설(빈손)은 calibrated=false 여도 보낸다(보정 확정 전 확인용). home_deg_s·home_max_deg = executor home(go_home): 지금 자세 → home_n 관절 속도, 어느 관절이든 이보다 멀면 거부",
+  "exec_deg_s": 20,
+  "exec_deg_s_max": 45,
+  "grip_units_s": 20,
+  "track_max_deg": 8,
+  "track_ticks": 3,
+  "lag_ticks": 3,
+  "stale_s": 0.5,
+  "start_tol_deg": 10,
+  "floor_mm": 0,
+  "link_floor_mm": 20,
+  "radius_mm": [
+   110,
+   460
+  ],
+  "radius_below_mm": 120,
+  "forbid_below_mm": 60,
+  "forbid_margin_mm": 10,
+  "forbid_extra_mm": [],
+  "grip_min_n": 48,
+  "grip_close_min_n": 51,
+  "rehearsal_lift_min_mm": 30,
+  "home_deg_s": 8,
+  "home_max_deg": 60,
+  "air_deg_s": 36,
+  "air_acc_deg_s2": 150,
+  "hold_tail_s": 0.1
+ },
+ "studio_environment": null,
+ "home_n": [
+  0.0,
+  -52.3,
+  4.8,
+  50.9,
+  2.2,
+  50.1
+ ],
+ "wrist": {
+  "enabled": true,
+  "after_area_scale": 0.6,
+  "close_area_scale": 0.6,
+  "ref": "wrist_ref_fixed.json",
+  "shots": 1,
+  "retry_put_down": true,
+  "reuse_dir_photo": true
+ },
+ "grasp": {
+  "mode": "ik",
+  "policy": "grasp",
+  "timeout_s": 10,
+  "start_z_mm": 135,
+  "act_align_iters": 1,
+  "approach_safe_mm": 90,
+  "fallback_ik": true,
+  "start_back_mm": 33,
+  "start_side_mm": -17,
+  "start_tilt_deg": 22
+ }
+}

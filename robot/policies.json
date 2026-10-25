@@ -1,0 +1,96 @@
+{
+  "_doc": "정책 이름 → Studio 모델. 학습이 끝나면 `python -m robot.run_policy --link <정책> <모델ID>` 로 model_id 를 채운다(README 5절). null 인 키는 defaults 를 쓴다. defaults.timeout_s 21 = 15초(±3) 에피소드의 90%(약 18초) + 3초(10-22 새벽 40 → 21), --link 가 데이터셋 값으로 정책마다 덮는다.",
+  "studio_url": "http://127.0.0.1:7860",
+  "docker_context": "default",
+  "container": "physical-ai-studio-xpu",
+  "robot_name": "ball-sorter-follower",
+  "defaults": {
+    "device": "GPU",
+    "timeout_s": 21,
+    "startup_budget_s": 90,
+    "return_to_initial_state": true,
+    "camera_idle_timeout_s": 1.0,
+    "early_stop": {
+      "_doc": "홈 복귀 정지 감지(README 2.1): 홈에서 leave 넘게 벗어났다가 near 안으로 돌아와 hold_s 초 동안 6관절 변화폭 ≤ still 이면 SIGINT 로 정상 종료. timeout_s 는 안전 상한. 켜면 런타임 복귀를 끄고, 끝 자세가 시작 자세에서 return_far 넘게 떨어졌을 때만 복귀(README 2.3). 단위 = 정규화(약 1.8°). 끄면(enabled false) 예전 동작",
+      "enabled": true,
+      "leave": 15,
+      "near": 8,
+      "still": 3.0,
+      "hold_s": 1.0,
+      "return_far": 6
+    }
+  },
+  "policies": {
+    "pick_defect": {
+      "model_id": "ef64c0f9-0773-4b77-a119-e1872ab3e70a",
+      "environment_id": null,
+      "camera_map": null,
+      "timeout_s": 45,
+      "note": "2026-10-22 13:37 연결 — 데이터셋 pick_defect, 에피소드 51개 90% 20.5s → timeout_s 24",
+      "temporary": false,
+      "early_stop": {
+        "enabled": false
+      },
+      "deprecated": true,
+      "deprecated_why": "10-23 13:35 사용자 결정 — 시연 정책은 handoff 하나(집기는 IK 좌표 집기). 실행기 --grasp act 길은 남김"
+    },
+    "pick_red": {
+      "model_id": "708a44b7-ff34-4302-93b9-763dc15066b0",
+      "environment_id": null,
+      "camera_map": null,
+      "timeout_s": 45,
+      "temporary": false,
+      "note": "2026-10-22 17:44 연결 — 데이터셋 pick_red, 에피소드 51개 90% 15.4s → timeout_s 19",
+      "deprecated": true,
+      "deprecated_why": "10-23 13:35 사용자 결정 — 시연 정책은 handoff 하나(집기는 IK 좌표 집기). 실행기 --grasp act 길은 남김"
+    },
+    "pick_blue": {
+      "model_id": "b3407a54-4071-4c77-9bab-3b6d930a021a",
+      "environment_id": null,
+      "camera_map": null,
+      "timeout_s": 45,
+      "note": "2026-10-22 15:00 연결 — 데이터셋 pick_green, 에피소드 51개 90% 14.6s → timeout_s 18",
+      "temporary": false,
+      "deprecated": true,
+      "deprecated_why": "10-23 13:35 사용자 결정 — 시연 정책은 handoff 하나(집기는 IK 좌표 집기). 실행기 --grasp act 길은 남김"
+    },
+    "handoff": {
+      "model_id": "193805f8-9e6d-4ba7-af31-d3d4328696d5",
+      "environment_id": null,
+      "camera_map": null,
+      "timeout_s": 45,
+      "note": "2026-10-22 16:06 연결 — 데이터셋 handoff, 에피소드 52개 90% 15.4s → timeout_s 19",
+      "temporary": false
+    },
+    "grasp": {
+      "model_id": "0f0235e1-eec1-4b9e-831c-204c58e6713a",
+      "environment_id": null,
+      "camera_map": null,
+      "timeout_s": 10,
+      "device": "CPU",
+      "return_to_initial_state": false,
+      "early_stop": {
+        "enabled": true,
+        "mode": "grasp",
+        "close_drop": 6,
+        "lift_mm": 50,
+        "still": 99,
+        "hold_s": 0,
+        "_doc": "집기 끝 감지(robot/grasp_stop.py): 그리퍼가 최댓값에서 close_drop 넘게 닫힘 → 집게 가운데가 닫은 뒤 최저점보다 lift_mm 넘게 들리면 SIGINT(hold_s 0 = 정지 안 기다림). 10-23 grasp 녹화 39개: 사람은 100~200mm 높이 들고 17개는 끝에 0.5초 가만히 있지 않아, 정지 조건이면 22/39 만 끝남 → lift 50·정지 없음이면 39/39, 닫고 약 1.1초 뒤. 복귀 안 함(좌표 집기 실행기가 그 자리부터 나른다) · 바닥 누름(10-23 12:59 실물: 닫지 않고 tcp −6.6mm 로 10초): 닫기 전 tcp 가 floor_mm 아래 floor_hold_s 넘게(또는 floor_hard_mm 아래) 있으면 바로 끝(floor_stop → 실행기가 IK 로). 녹화 사람 39개는 −3mm 아래 최대 0.8초·최저 −10mm 라 안 걸림",
+        "floor_mm": -3,
+        "floor_hold_s": 1.0,
+        "floor_hard_mm": -15
+      },
+      "note": "2026-10-23 12:06 연결 — 데이터셋 pick_only, 에피소드 39개 90% 6.9s → timeout_s 10",
+      "execution": {
+        "mode": "async",
+        "request_threshold": 0.85,
+        "smoother_frames": 8,
+        "_doc": "Studio 런타임 추론(run_policy.execution_settings): async = 뒤 스레드 추론(CPU 약 70~140ms 동안 제어 틱이 안 멈춤), 남은 동작이 청크(100틱)의 0.85 아래면 = 15틱(0.5초)마다 다시 추론(기본 0.5 = 50틱), 새 청크와 남은 동작을 8틱 섞음. 시간 앙상블은 내보낸 모델 런타임에 없음"
+      },
+      "temporary": false,
+      "deprecated": true,
+      "deprecated_why": "10-23 13:35 사용자 결정 — 시연 정책은 handoff 하나(집기는 IK 좌표 집기). 실행기 --grasp act 길은 남김"
+    }
+  }
+}

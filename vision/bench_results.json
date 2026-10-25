@@ -1,0 +1,87 @@
+{
+ "env": {
+  "date": "2026-10-21T17:00:55+09:00",
+  "openvino": "2026.4.1",
+  "devices": {
+   "CPU": "Intel(R) Core(TM) Ultra 9 185H",
+   "GPU": "Intel(R) Arc(TM) Graphics (iGPU)",
+   "NPU": "Intel(R) AI Boost"
+  },
+  "power": "AC",
+  "ball_ovms": "inactive"
+ },
+ "rows": [
+  {
+   "model": "coco_int8_openvino_model",
+   "device": "CPU",
+   "compile_ms": 290,
+   "lat_median_ms": 12.74,
+   "lat_p90_ms": 16.21,
+   "lat_mean_ms": 13.58,
+   "fps_sync": 73.7,
+   "fps_throughput": 110.0,
+   "nireq": 6,
+   "e2e_ms": 19.13
+  },
+  {
+   "model": "coco_int8_openvino_model",
+   "device": "GPU",
+   "compile_ms": 2678,
+   "lat_median_ms": 3.31,
+   "lat_p90_ms": 3.66,
+   "lat_mean_ms": 3.45,
+   "fps_sync": 289.7,
+   "fps_throughput": 454.0,
+   "nireq": 128,
+   "e2e_ms": 9.0
+  },
+  {
+   "model": "coco_int8_openvino_model",
+   "device": "NPU",
+   "compile_ms": 1047,
+   "lat_median_ms": 7.05,
+   "lat_p90_ms": 7.23,
+   "lat_mean_ms": 7.08,
+   "fps_sync": 141.2,
+   "fps_throughput": 163.8,
+   "nireq": 4,
+   "e2e_ms": 10.32
+  },
+  {
+   "model": "coco_fp16_openvino_model",
+   "device": "CPU",
+   "compile_ms": 119,
+   "lat_median_ms": 27.49,
+   "lat_p90_ms": 35.37,
+   "lat_mean_ms": 29.01,
+   "fps_sync": 34.5,
+   "fps_throughput": 33.2,
+   "nireq": 6,
+   "e2e_ms": 34.12
+  },
+  {
+   "model": "coco_fp16_openvino_model",
+   "device": "GPU",
+   "compile_ms": 209,
+   "lat_median_ms": 4.47,
+   "lat_p90_ms": 4.57,
+   "lat_mean_ms": 4.44,
+   "fps_sync": 225.4,
+   "fps_throughput": 217.6,
+   "nireq": 64,
+   "e2e_ms": 11.31
+  },
+  {
+   "model": "coco_fp16_openvino_model",
+   "device": "NPU",
+   "compile_ms": 660,
+   "lat_median_ms": 7.81,
+   "lat_p90_ms": 8.17,
+   "lat_mean_ms": 7.89,
+   "fps_sync": 126.8,
+   "fps_throughput": 145.3,
+   "nireq": 4,
+   "e2e_ms": 10.84
+  }
+ ]
+}

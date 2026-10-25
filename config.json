@@ -1,0 +1,23 @@
+{
+  "model_config_list": [],
+  "mediapipe_config_list": [
+    {
+      "name": "qwen3-4b",
+      "base_path": "models/OpenVINO/Qwen3-4B-int4-ov",
+      "graph_path": "graph_kv1.pbtxt"
+    },
+    {
+      "name": "qwen3-embedding",
+      "base_path": "models/OpenVINO/Qwen3-Embedding-0.6B-int8-ov"
+    },
+    {
+      "name": "qwen3-reranker",
+      "base_path": "models/OpenVINO/Qwen3-Reranker-0.6B-seq-cls-fp16-ov",
+      "graph_path": "graph_gpu.pbtxt"
+    },
+    {
+      "name": "whisper",
+      "base_path": "models/OpenVINO/whisper-large-v3-turbo-int8-ov"
+    }
+  ]
+}

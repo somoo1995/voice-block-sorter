@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ title }}</title>
+<style>
+  :root {
+    --ink: #1c2024; --ink-2: #60646c; --line: #e0e1e6; --bg: #ffffff; --panel: #f7f8fa;
+    --red: #d6409f; --blue: #2f9e44; --defect: #2b2f36; --hand: #e2a336; --ok: #30a46c; --bad: #e5484d;
+    --npu: #8e4ec6; --gpu: #3e63dd; --cpu: #12a594;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: "Noto Sans CJK KR", "NanumBarunGothic", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+         font-size: 14px; line-height: 1.55; word-break: keep-all; }
+  .page { max-width: 980px; margin: 0 auto; padding: 32px 28px 40px; }
+  header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start;
+           border-bottom: 2px solid var(--ink); padding-bottom: 14px; }
+  h1 { font-size: 24px; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .meta { color: var(--ink-2); font-size: 13px; }
+  .badge { display: inline-block; border: 1px solid var(--ok); color: var(--ok); border-radius: 999px;
+           padding: 3px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .badge.off { border-color: var(--bad); color: var(--bad); }
+  .summary { margin: 18px 0 6px; padding: 14px 18px; background: var(--panel); border-left: 4px solid var(--ink);
+             font-size: 17px; font-weight: 600; }
+  h2 { font-size: 16px; margin: 28px 0 10px; display: flex; align-items: baseline; gap: 8px; }
+  h2 small { font-weight: 400; color: var(--ink-2); font-size: 12px; }
+  .kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-top: 16px; }
+  .kpi { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .kpi b { display: block; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .kpi span { color: var(--ink-2); font-size: 12px; }
+  .kpi.red b { color: var(--red); } .kpi.blue b { color: var(--blue); } .kpi.defect b { color: var(--defect); }
+  .kpi.hand b { color: var(--hand); }
+  .photos { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  figure { margin: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--panel); }
+  figure img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: contain; background: #f3f4f6; }  /* 16:9 카메라도 잘리지 않게 */
+  figure .noimg { aspect-ratio: 4 / 3; display: grid; place-items: center; color: var(--ink-2); }
+  figcaption { padding: 7px 12px; font-size: 13px; display: flex; justify-content: space-between; }
+  figcaption span { color: var(--ink-2); }
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: left; }
+  th { font-size: 12px; color: var(--ink-2); font-weight: 600; background: var(--panel); }
+  td.num, th.num { text-align: right; }
+  .match { font-weight: 700; } .match.yes { color: var(--ok); } .match.no { color: var(--bad); }
+  .bar { position: relative; height: 8px; background: var(--line); border-radius: 4px; min-width: 80px; }
+  .bar i { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--ok); }
+  .dev { display: inline-block; min-width: 42px; text-align: center; border-radius: 6px; padding: 1px 6px;
+         font-size: 12px; font-weight: 700; color: #fff; background: #6b7280; }  /* MOCK 등 그 밖은 회색 */
+  .dev.NPU { background: var(--npu); } .dev.GPU { background: var(--gpu); } .dev.CPU { background: var(--cpu); }
+  .checks { margin: 0; padding-left: 20px; }
+  .none { color: var(--ink-2); }
+  footer { margin-top: 32px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--ink-2); font-size: 12px;
+           display: flex; justify-content: space-between; }
+  @media (max-width: 720px) { .kpis { grid-template-columns: repeat(3, 1fr); } .photos { grid-template-columns: 1fr; } }
+  @media print { .page { padding: 0; } h2 { break-after: avoid; } table, figure { break-inside: avoid; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <div>
+      <h1>{{ title }}</h1>
+      <div class="meta">
+        {{ started }}{% if ended %} ~ {{ ended }}{% endif %}
+        {% if job_id %} · 작업 {{ job_id }}{% endif %} · 기준서 BS-STD-01 7.2
+      </div>
+    </div>
+    {% if offline %}<span class="badge">온디바이스 · 외부 API 호출 0건</span>
+    {% else %}<span class="badge off">{{ net_note or "외부 호출 있음" }}</span>{% endif %}
+  </header>
+
+  {% if summary %}<div class="summary">{{ summary }}</div>{% endif %}
+
+  <div class="kpis">
+    {% for k in kpis %}
+    <div class="kpi {{ k.kind }}"><b>{{ k.value }}</b><span>{{ k.label }}</span></div>
+    {% endfor %}
+  </div>
+
+  <h2>작업 전후 사진 <small>위 카메라, 검출 박스 포함</small></h2>
+  <div class="photos">
+    {% for p in photos %}
+    <figure>
+      {% if p.src %}<img src="{{ p.src }}" alt="{{ p.label }}">{% else %}<div class="noimg">사진 없음</div>{% endif %}
+      <figcaption><b>{{ p.label }}</b><span>{{ p.ts or "" }}</span></figcaption>
+    </figure>
+    {% endfor %}
+  </div>
+
+  <h2>개수 <small>작업 기록과 카메라로 센 개수 대조</small></h2>
+  <table>
+    <thead><tr><th>구역</th><th class="num">기록</th><th class="num">카메라</th><th>일치</th><th>내역</th></tr></thead>
+    <tbody>
+    {% for c in counts %}
+      <tr>
+        <td>{{ c.label }}</td>
+        <td class="num">{{ c.record if c.record is not none else "-" }}</td>
+        <td class="num">{{ c.camera if c.camera is not none else "-" }}</td>
+        <td>{% if c.record is none or c.camera is none %}<span class="none">-</span>
+            {% elif c.record == c.camera %}<span class="match yes">일치</span>
+            {% else %}<span class="match no">불일치 ({{ c.camera - c.record }})</span>{% endif %}</td>
+        <td>{{ c.detail or "" }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>시도와 성공 <small>정책별, 재시도 포함</small></h2>
+  <table>
+    <thead><tr><th>정책</th><th class="num">시도</th><th class="num">성공</th><th>성공률</th><th class="num">총 시간</th><th class="num">1회 평균</th></tr></thead>
+    <tbody>
+    {% for p in policies %}
+      <tr>
+        <td>{{ p.label }} <span class="none">{{ p.name }}</span></td>
+        <td class="num">{{ p.attempts }}</td>
+        <td class="num">{{ p.success }}</td>
+        <td><div class="bar"><i style="width: {{ p.rate }}%"></i></div> {{ p.rate }}%</td>
+        <td class="num">{{ "%.1f"|format(p.total_s) }}초</td>
+        <td class="num">{{ "%.1f"|format(p.avg_s) }}초</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="none">실행한 정책이 없습니다.</td></tr>
+    {% endfor %}
+    {% if policies %}
+      <tr><th>합계</th><th class="num">{{ total.attempts }}</th><th class="num">{{ total.success }}</th>
+          <th>{{ total.rate }}%</th><th class="num">{{ "%.1f"|format(total.total_s) }}초</th><th></th></tr>
+    {% endif %}
+    </tbody>
+  </table>
+
+  <h2>소요 시간 <small>명령별, 말이 끝난 뒤부터</small></h2>
+  <table>
+    <thead><tr><th>시각</th><th>명령</th><th>의도</th><th class="num">소요</th><th>결과</th></tr></thead>
+    <tbody>
+    {% for c in commands %}
+      <tr><td>{{ c.ts }}</td><td>{{ c.text }}</td><td>{{ c.intent or "" }}</td>
+          <td class="num">{{ "%.1f"|format(c.duration_s) if c.duration_s is not none else "-" }}초</td><td>{{ c.result or "" }}</td></tr>
+    {% else %}
+      <tr><td colspan="5" class="none">기록된 명령이 없습니다.</td></tr>
+    {% endfor %}
+    {% if duration_s is not none %}
+      <tr><th colspan="3">전체</th><th class="num">{{ "%.1f"|format(duration_s) }}초</th><th></th></tr>
+    {% endif %}
+    </tbody>
+  </table>
+
+  <h2>디바이스별 추론 시간 <small>NPU · GPU · CPU 에서 무엇이 돌았나</small></h2>
+  <table>
+    <thead><tr><th>계층</th><th>모델</th><th>디바이스</th><th class="num">호출</th><th class="num">평균</th><th class="num">최대</th></tr></thead>
+    <tbody>
+    {% for d in devices %}
+      <tr><td>{{ d.layer }}</td><td>{{ d.model }}</td><td><span class="dev {{ d.device }}">{{ d.device }}</span></td>
+          <td class="num">{{ d.calls if d.calls is not none else "-" }}</td>
+          <td class="num">{{ d.avg_text }}</td><td class="num">{{ d.max_text }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>사람 확인 요청 <small>기준서 5.5</small></h2>
+  {% if human_checks %}
+  <ul class="checks">{% for h in human_checks %}<li>{{ h }}</li>{% endfor %}</ul>
+  {% else %}<p class="none">없음</p>{% endif %}
+
+  <footer><span>말로 시키는 스펀지 블록 선별 로봇 · OpenVINO 온디바이스</span><span>생성 {{ generated }}</span></footer>
+</div>
+</body>
+</html>

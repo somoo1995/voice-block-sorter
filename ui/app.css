@@ -1,0 +1,166 @@
+/* 발표용 대시보드 — Gradio 변수(--body-text-color 등)를 써서 밝은/어두운 화면 둘 다 맞춘다 */
+:root {
+  --c-red: #d6409f; --c-blue: #2f9e44; --c-defect: #3a3f47; --c-hand: #e2a336;  /* 이름은 코드대로 red = 분홍, blue = 초록 */
+  --c-pink-fill: #f6b8d1; --c-green-fill: #a7dcb0;  /* 파스텔 스펀지 블록 */
+  --c-npu: #8e4ec6; --c-gpu: #3e63dd; --c-cpu: #12a594; --c-ok: #30a46c; --c-warn: #d97706; --c-bad: #e5484d;
+  --c-refuse: #d97706;  /* 거부(할 수 없어 하지 않음, ⊘) — 실패(✗ --c-bad 빨강)와 구별 */
+}
+.gradio-container { max-width: 1760px !important; }
+.sub { color: var(--body-text-color-subdued); }
+
+/* 머리줄 */
+.hdr { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 4px 2px 2px; }
+.hdr .ttl { display: flex; flex-direction: column; margin-right: 10px; }
+.hdr .ttl b { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+.hdr .ttl small { font-size: 12px; color: var(--body-text-color-subdued); }
+.pill { border: 1px solid var(--border-color-primary); border-radius: 999px; padding: 3px 10px;
+        font-size: 12px; font-weight: 700; white-space: nowrap; color: var(--body-text-color-subdued); }
+.pill.ok { color: var(--c-ok); border-color: var(--c-ok); }
+.pill.warn { color: var(--c-warn); border-color: var(--c-warn); }
+.pill.bad { color: var(--c-bad); border-color: var(--c-bad); }
+.pill.view { color: var(--color-accent); border-color: var(--color-accent); font-weight: 800; }  /* 보기 전용 화면 주소(ui/view.py) */
+.hdr .run { margin-left: auto; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--color-accent);
+       margin-right: 6px; animation: blink 1s ease-in-out infinite; vertical-align: middle; }
+@keyframes blink { 50% { opacity: .25; } }
+
+.ptitle { font-size: 12px; font-weight: 800; letter-spacing: .04em; color: var(--body-text-color-subdued); margin: 2px 0 8px; }
+.panel { border: 1px solid var(--border-color-primary); border-radius: 12px; padding: 12px 14px !important;
+         background: var(--block-background-fill); }
+
+/* 카메라 */
+#snap { border-radius: 12px; overflow: hidden; }
+.snapcap { font-size: 13px; color: var(--body-text-color-subdued); padding: 4px 2px 0; font-variant-numeric: tabular-nums; }
+
+/* LangGraph 노드 */
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.node { position: relative; border: 1.5px solid var(--border-color-primary); border-radius: 10px; padding: 7px 10px 5px;
+        min-width: 78px; text-align: center; font-weight: 700; font-size: 14px; background: var(--background-fill-primary);
+        color: var(--body-text-color-subdued); transition: all .2s; }
+.node small { display: block; font-size: 10px; font-weight: 400; font-family: var(--font-mono); opacity: .7; }
+.node em { position: absolute; top: -8px; right: -6px; font-style: normal; font-size: 11px; background: var(--c-ok);
+           color: #fff; border-radius: 999px; padding: 0 6px; }
+.node.done { border-color: var(--c-ok); color: var(--c-ok); }
+.node.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff;
+               box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent) 22%, transparent); animation: glow 1.4s ease-in-out infinite; }
+.node.active em { background: #fff; color: var(--color-accent); }
+@keyframes glow { 50% { box-shadow: 0 0 0 9px color-mix(in srgb, var(--color-accent) 8%, transparent); } }
+.arrow { color: var(--body-text-color-subdued); font-size: 18px; }
+.now { margin-top: 10px; font-size: 14px; min-height: 20px; }
+
+/* 개수 카드 */
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 4px; }
+.card { position: relative; border: 1px solid var(--border-color-primary); border-radius: 12px; padding: 10px 14px 10px 18px;
+        background: var(--block-background-fill); overflow: hidden; }
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--acc); }
+.card.defect { --acc: var(--c-defect); } .card.red { --acc: var(--c-red); } .card.blue { --acc: var(--c-blue); } .card.hand { --acc: var(--c-hand); }
+.card span { font-size: 14px; font-weight: 800; }
+.card b { display: block; font-size: 44px; line-height: 1.05; font-weight: 800; color: var(--acc); font-variant-numeric: tabular-nums; }
+.card.defect b { color: var(--body-text-color); }
+.card em { font-style: normal; font-size: 11px; color: var(--body-text-color-subdued); }
+.card.bump b { animation: bump .7s ease-out; }
+/* 카드 오른쪽 위 표(10-23): 위치·관계(.pos, 카드 색) 위, 불량 색(.dcls, 그 색) 아래. 거부는 점선 주황.
+   긴 위치("로봇에 가장 가까운")는 카드 이름을 가리지 않게 낱말 단위로 줄을 바꾼다 */
+.card .tags { position: absolute; top: 8px; right: 10px; max-width: calc(100% - 66px); display: flex; flex-direction: column;
+              align-items: flex-end; gap: 3px; font-size: 12px; font-weight: 800; }
+.card .tags i { padding: 2px 9px; border-radius: 10px; font-style: normal; line-height: 1.3; color: #fff; text-align: right;
+                word-break: keep-all; }
+.card .pos { background: var(--acc); }
+.card .dcls { background: var(--c-defect); }
+.card .dcls.red_defect { background: var(--c-red); } .card .dcls.blue_defect { background: var(--c-blue); }
+.card .tags .refuse { background: none; color: var(--c-refuse); border: 1.5px dashed var(--c-refuse); }
+@keyframes bump { 0% { transform: scale(1.35); } 100% { transform: scale(1); } }
+
+/* 디바이스 표 */
+.devtbl { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.devtbl th { text-align: left; font-size: 11px; color: var(--body-text-color-subdued); font-weight: 700;
+             border-bottom: 1px solid var(--border-color-primary); padding: 4px 6px; }
+.devtbl td { padding: 5px 6px; border-bottom: 1px solid var(--border-color-primary); white-space: nowrap; }
+.devtbl td:nth-child(2) { white-space: normal; font-size: 12px; }
+.devtbl .num { text-align: right; }
+.devtbl tr.active td { background: color-mix(in srgb, var(--color-accent) 12%, transparent); font-weight: 700; }
+.dev { display: inline-block; min-width: 40px; text-align: center; border-radius: 6px; padding: 1px 6px;
+       font-size: 11px; font-weight: 800; color: #fff; background: #888; }
+.dev.NPU { background: var(--c-npu); } .dev.GPU { background: var(--c-gpu); } .dev.CPU { background: var(--c-cpu); }
+
+/* 로그: 최신이 아래, 스크롤은 늘 맨 아래 (column-reverse) */
+.log { height: 252px; overflow-y: auto; display: flex; flex-direction: column-reverse;
+       font-family: var(--font-mono); font-size: 12px; line-height: 1.5; }
+.log .l { padding: 2px 0; border-bottom: 1px dashed color-mix(in srgb, var(--border-color-primary) 70%, transparent); }
+.log .ts { color: var(--body-text-color-subdued); margin-right: 8px; }
+.log .k { display: inline-block; min-width: 70px; margin-right: 6px; font-weight: 700; color: var(--body-text-color-subdued); }
+.log .t-node .k { color: var(--color-accent); }
+.log .t-say { color: var(--c-ok); } .log .t-ok .k { color: var(--c-ok); }
+.log .t-error { color: var(--c-bad); } .log .t-warn { color: var(--c-warn); } .log .t-refuse { color: var(--c-refuse); }
+.log .t-cmd { font-weight: 700; } .log .t-stt { color: var(--c-npu); }
+
+/* 입력 */
+#controls { border: 1px solid var(--border-color-primary); border-radius: 12px; padding: 8px; background: var(--block-background-fill); }
+#mic { min-height: 0; }
+#stopbtn { font-weight: 800; font-size: 16px; }
+#quick button { flex: 0 1 auto; min-width: 0; }
+#quick .qbtn { font-size: 15px; font-weight: 700; padding: 6px 12px; }  /* 실연 ①~⑤ 는 크게 */
+#resetbtn { margin-left: auto; }
+#extra { margin-top: 4px; } #extra button { flex: 0 1 auto; min-width: 0; }
+
+/* 보고서 */
+.report-frame { width: 100%; height: 760px; border: 1px solid var(--border-color-primary); border-radius: 10px; background: #fff; }
+.open { display: inline-block; margin: 0 0 8px; font-size: 13px; }
+.empty { color: var(--body-text-color-subdued); padding: 16px; }
+
+/* 현재 배치(작업대 그림) */
+#layout { min-height: 360px; }
+.bench { width: 100%; height: auto; display: block; font-family: inherit; }
+.bench .zone { fill: color-mix(in srgb, var(--body-text-color) 4%, transparent); stroke: var(--border-color-primary); stroke-width: 1.5; }
+.bench .bowl.bowl_red { stroke: var(--c-red); } .bench .bowl.bowl_blue { stroke: var(--c-blue); } .bench .bowl.bowl_defect { stroke: var(--c-defect); }
+.bench .grid { stroke: var(--border-color-primary); stroke-dasharray: 3 4; }
+.bench .hand { stroke: var(--c-hand); stroke-dasharray: 5 4; }
+.bench .hand.on { fill: color-mix(in srgb, var(--c-hand) 22%, transparent); stroke-dasharray: none; stroke-width: 2.5; }
+.bench .hand-t { fill: var(--c-hand); font-size: 14px; font-weight: 800; text-anchor: middle; }
+.bench .zlabel { fill: var(--body-text-color); font-size: 14px; font-weight: 800; }
+.bench .cnt { fill: var(--body-text-color); font-size: 28px; font-weight: 800; text-anchor: middle; }
+.bench .cnt-s { fill: var(--body-text-color-subdued); font-size: 11.5px; text-anchor: middle; }
+.bench .blk { stroke-width: 1.4; } .bench .blk.pink { fill: var(--c-pink-fill); stroke: var(--c-red); }
+.bench .blk.green { fill: var(--c-green-fill); stroke: var(--c-blue); }
+.bench .xmark { stroke: #111; stroke-width: 2.2; stroke-linecap: round; fill: none; }
+.bench .lg { fill: var(--body-text-color-subdued); font-size: 12.5px; }
+.bench-cap { font-size: 13px; color: var(--body-text-color-subdued); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.plan { margin-top: 10px; border-top: 1px solid var(--border-color-primary); padding-top: 8px; }
+.plan .ptitle { margin-bottom: 6px; }
+.plan ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.plan li { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; padding: 5px 8px; border-radius: 8px;
+           border: 1px solid var(--border-color-primary); color: var(--body-text-color-subdued); }
+.plan li i { width: 16px; font-style: normal; text-align: center; }
+.plan li em { margin-left: auto; font-style: normal; font-size: 12px; font-variant-numeric: tabular-nums; }
+.plan li.st-active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+.plan li.st-done { color: var(--c-ok); border-color: var(--c-ok); }
+.plan li.st-fail, .plan li.st-stop { color: var(--c-bad); border-color: var(--c-bad); }
+.plan li.st-refuse { color: var(--c-refuse); border-color: var(--c-refuse); border-style: dashed; }
+.plan li.st-skip { opacity: .6; }
+/* 위치·관계 표 — 투입 구역 안 그 쪽(맨 아래·가까운은 아래 = 로봇 쪽). "분홍 옆"은 기준 블록에 점선 테두리 */
+.bench .ref { fill: none; stroke: var(--color-accent); stroke-width: 1.6; stroke-dasharray: 3 2; }
+.bench .ref.refuse { stroke: var(--c-refuse); }
+.bench .which rect { fill: var(--color-accent); }
+.bench .which text { fill: #fff; font-size: 13px; font-weight: 800; text-anchor: middle; }
+.bench .which.refuse rect { fill: none; stroke: var(--c-refuse); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.bench .which.refuse text { fill: var(--c-refuse); }
+
+/* 숫자 배치 계획(좌표 집기) */
+.bench .slot { fill: none; stroke: var(--border-color-primary); stroke-dasharray: 3 3; }
+.bench .blk.gray { fill: #d4d4d8; stroke: #71717a; }
+.bench .blk.ghost { opacity: .55; }
+.bench .ord { fill: #1c2024; font-size: 11px; font-weight: 800; text-anchor: middle; }
+.bench .arw { stroke-width: 1.3; opacity: .55; fill: none; } .bench .arw.pink { stroke: var(--c-red); } .bench .arw.green { stroke: var(--c-blue); }
+.bench .arw.gray { stroke: #71717a; } .bench .ah { fill: var(--body-text-color-subdued); }
+.arr-note { font-size: 13px; margin-top: 6px; color: var(--c-warn); font-weight: 700; }
+.arr-warn { font-size: 12px; margin-top: 3px; color: var(--body-text-color-subdued); }
+.arr-ask { margin-top: 8px; padding: 8px 10px; border-radius: 8px; font-size: 16px; font-weight: 700;
+           background: color-mix(in srgb, var(--color-accent) 14%, transparent); border: 1px solid var(--color-accent); }
+#confirm { margin-top: 6px; gap: 8px; }
+/* 질문 답 말풍선 아래 근거 줄(say.sources[].cite) */
+#chat .cite { display: inline-block; margin-top: 2px; padding: 1px 8px; border-radius: 6px; font-size: 13px; font-weight: 700;
+              color: var(--body-text-color-subdued); border: 1px solid var(--border-color-primary); }
+/* 거부 말풍선: 문구는 그대로, ⊘ 와 왼쪽 띠만 주황(실패 ⚠ 와 구별) */
+#chat .refuse { display: inline-block; padding-left: 8px; border-left: 3px solid var(--c-refuse); }
+#chat .refuse b { color: var(--c-refuse); font-weight: 800; }
